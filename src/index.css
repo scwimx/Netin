@@ -1,0 +1,207 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "@fontsource-variable/bricolage-grotesque";
+@import "@fontsource-variable/figtree";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+  Netin: consola de salud. Fondo "vacío" azul noche, superficies "casco".
+  El acento cambia con la etapa de la misión (data-etapa en <html>).
+  Los colores de estado están reservados y siempre van con ícono y etiqueta.
+*/
+:root {
+  --radius: 0.75rem;
+
+  --vacio: #080d1a;
+  --casco: #111a2e;
+  --casco-alto: #18233c;
+  --borde: #26334f;
+  --tinta: #e9eef8;
+  --tinta-suave: #9eabc6;
+  --tinta-tenue: #6f7d9b;
+
+  /* Acento por etapa (por defecto: Tierra) */
+  --acento: #4fd1a5;
+  --acento-tinta: #06231a;
+  --acento-suave: rgb(79 209 165 / 0.14);
+
+  /* Estados (reservados) */
+  --bien: #3ecf8e;
+  --aviso: #f5b83d;
+  --serio: #f58a4b;
+  --critico: #f0556a;
+  --info: #7aa7ff;
+
+  /* Tokens shadcn */
+  --background: var(--vacio);
+  --foreground: var(--tinta);
+  --card: var(--casco);
+  --card-foreground: var(--tinta);
+  --popover: var(--casco-alto);
+  --popover-foreground: var(--tinta);
+  --primary: var(--acento);
+  --primary-foreground: var(--acento-tinta);
+  --secondary: var(--casco-alto);
+  --secondary-foreground: var(--tinta);
+  --muted: var(--casco-alto);
+  --muted-foreground: var(--tinta-suave);
+  --accent: var(--casco-alto);
+  --accent-foreground: var(--tinta);
+  --destructive: var(--critico);
+  --border: var(--borde);
+  --input: var(--borde);
+  --ring: var(--acento);
+  /* Serie categórica validada (modo oscuro, superficie --casco) */
+  --chart-1: #2a9cc8;
+  --chart-2: #d0782e;
+}
+
+:root[data-etapa="orbita"] {
+  --acento: #4cc9f0;
+  --acento-tinta: #04202b;
+  --acento-suave: rgb(76 201 240 / 0.14);
+}
+:root[data-etapa="transito"] {
+  --acento: #a99bff;
+  --acento-tinta: #150f38;
+  --acento-suave: rgb(169 155 255 / 0.15);
+}
+:root[data-etapa="marte"] {
+  --acento: #e9a877;
+  --acento-tinta: #2b1505;
+  --acento-suave: rgb(233 168 119 / 0.15);
+}
+
+@theme inline {
+  --font-sans: "Figtree Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Bricolage Grotesque Variable", "Figtree Variable", ui-sans-serif, sans-serif;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-vacio: var(--vacio);
+  --color-casco: var(--casco);
+  --color-casco-alto: var(--casco-alto);
+  --color-borde: var(--borde);
+  --color-tinta: var(--tinta);
+  --color-tinta-suave: var(--tinta-suave);
+  --color-tinta-tenue: var(--tinta-tenue);
+  --color-acento: var(--acento);
+  --color-acento-tinta: var(--acento-tinta);
+  --color-acento-suave: var(--acento-suave);
+  --color-bien: var(--bien);
+  --color-aviso: var(--aviso);
+  --color-serio: var(--serio);
+  --color-critico: var(--critico);
+  --color-info: var(--info);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 6px);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-size: 15px;
+    line-height: 1.5;
+    transition: background-color 0.6s ease;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+    text-wrap: balance;
+  }
+  :focus-visible {
+    outline: 2px solid var(--acento);
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: var(--acento);
+    color: var(--acento-tinta);
+  }
+}
+
+.cifra {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-display);
+}
+
+/* Pulso de las zonas con síntoma activo en el mapa corporal */
+@keyframes latido-zona {
+  0%,
+  100% {
+    fill-opacity: 0.55;
+  }
+  50% {
+    fill-opacity: 0.9;
+  }
+}
+.zona-activa {
+  animation: latido-zona 2.4s ease-in-out infinite;
+}
+
+@keyframes respirar {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+}
+.respira {
+  animation: respirar 3.2s ease-in-out infinite;
+}
+
+@keyframes trazo {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Barras de desplazamiento discretas */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--borde) transparent;
+}

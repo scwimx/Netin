@@ -1,0 +1,20 @@
+node_modules/
+dist/
+
+# Datos privados: perfiles, registros médicos, fotos e índice
+datos/
+datos-prueba/
+
+# Documentos privados de la misión (solo se versiona el LEEME)
+documentos/*
+!documentos/LEEME.md
+
+# Claves y configuración local
+.env
+.env.*
+!.env.ejemplo
+
+*.log
+.DS_Store
+Thumbs.db
+.claude/
