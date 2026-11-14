@@ -1,0 +1,42 @@
+{
+  "name": "Netin",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "react-native start",
+    "windows": "react-native run-windows",
+    "windows:release": "react-native run-windows --release --no-launch",
+    "vista": "vite --config vista/vite.config.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@noble/ciphers": "^2.4.0",
+    "@noble/hashes": "^2.4.0",
+    "react": "19.2.3",
+    "react-native": "0.85.0",
+    "react-native-windows": "^0.85.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.2",
+    "@babel/preset-env": "^7.25.3",
+    "@babel/runtime": "^7.25.0",
+    "@react-native-community/cli": "20.1.0",
+    "@react-native/babel-preset": "0.85.0",
+    "@react-native/eslint-config": "0.85.0",
+    "@react-native/metro-config": "0.85.0",
+    "@react-native/typescript-config": "0.85.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.3.0",
+    "eslint": "^8.19.0",
+    "prettier": "2.8.8",
+    "react-dom": "^19.2.3",
+    "react-native-web": "^0.21.4",
+    "typescript": "^5.8.3",
+    "vite": "^8.3.8"
+  },
+  "engines": {
+    "node": ">= 22.11.0"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "extends": "@react-native/typescript-config",
+  "compilerOptions": {
+    "types": [],
+    "noUnusedLocals": false
+  },
+  "include": ["App.tsx", "index.js", "src/**/*.ts", "src/**/*.tsx"],
+  "exclude": ["**/node_modules", "src/**/*.web.ts", "vista"]
+}

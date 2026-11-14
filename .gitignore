@@ -1,18 +1,13 @@
 node_modules/
 dist/
 
-# Datos privados: perfiles, registros médicos, fotos e índice
+# Datos privados: perfiles, registros y fotos (la app los guarda cifrados en %LOCALAPPDATA%\Netin)
 datos/
 datos-prueba/
-
-# Documentos privados de la misión (solo se versiona el LEEME)
-documentos/*
-!documentos/LEEME.md
 
 # Claves y configuración local
 .env
 .env.*
-!.env.ejemplo
 
 *.log
 .DS_Store

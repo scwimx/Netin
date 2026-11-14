@@ -1,123 +1,139 @@
 # Netin
 
-Netin es una app de monitoreo de salud para astronautas, hecha para NASA Space Apps. Cada persona de la tripulación lleva un registro diario (foto, chequeo, prueba motora y bitácora), anota síntomas en un mapa corporal y ve sus mediciones y tendencias. Todos los datos se quedan en el equipo.
+Netin es una app de escritorio para Windows que monitorea la salud de la tripulación en Tierra, en órbita, en tránsito y en Marte. La hicimos para NASA Space Apps con React Native for Windows. La interfaz es amigable y animada, con estética de consola espacial, pero no es un juego: no hay puntos, niveles ni premios.
 
-La IA y la base de documentos médicos se integrarán después. Mientras tanto, cada reporte queda en una cola local con un formato estructurado, listo para que el asistente lo lea.
+Cada día, el tripulante completa un registro de cuatro pasos: foto, chequeo, prueba de reacción y bitácora. Además, puede anotar síntomas en un mapa corporal y revisar sus mediciones y tendencias.
 
-## Requisitos (Windows)
+Todo se guarda en el equipo, cifrado con la contraseña de cada perfil.
 
-- Node.js 24 o superior (probado con 26). Comprueba la versión con `node --version`.
-  Si tienes otro `node.exe` antiguo en el PATH (por ejemplo, el de Brackets), usa la ruta completa `"C:\Program Files\nodejs\node.exe"` o pon `C:\Program Files\nodejs` primero en el PATH.
-- Un navegador moderno (Edge o Chrome) con permiso de cámara para la foto diaria.
+> La versión web anterior (Node + Vite) quedó en el historial de git, commit `ad27085`.
 
-## Cómo ejecutarlo
+## Requisitos para compilar (Windows)
 
-En PowerShell, dentro de la carpeta del proyecto:
+React Native for Windows 0.85 necesita:
+
+- **Visual Studio 2026** con las cargas de trabajo «Desarrollo para el escritorio con C++», «Desarrollo de la Plataforma universal de Windows» y «Desarrollo de escritorio de .NET», más el Windows SDK 10.0.22621.
+- **.NET 10 SDK.**
+- **Node.js 22 o superior** y **Yarn**.
+- Modo de desarrollador y rutas largas activados.
+
+Para instalar todo de una vez, abre **PowerShell como administrador** dentro de `app` y ejecuta:
 
 ```powershell
+powershell -ExecutionPolicy Bypass -File node_modules\react-native-windows\scripts\rnw-dependencies.ps1 -Install
+```
+
+Si en tu PATH hay un Node antiguo (por ejemplo, el de Brackets), pon `C:\Program Files\nodejs` antes que él.
+
+## Cómo ejecutar
+
+Todos los comandos se ejecutan dentro de `app`:
+
+```powershell
+cd app
 npm install
-npm run dev
 ```
 
-Abre http://localhost:5173. `npm run dev` levanta la API (puerto 4310) y la interfaz (puerto 5173) a la vez.
-
-Para usarlo sin modo de desarrollo:
+Generar el proyecto de Windows (solo la primera vez, ver «Primer armado del proyecto de Windows»):
 
 ```powershell
-npm run build
-npm start
+npx react-native init-windows --overwrite
 ```
 
-Después abre http://127.0.0.1:4310.
-
-### Datos ficticios para la demo
+Ejecutar en modo desarrollo:
 
 ```powershell
-npm run demo:datos
+npm run windows
 ```
 
-Crea el perfil **Astra Demo** (contraseña `demo-netin`) con 14 días de registros inventados: chequeos, un síntoma en el hombro que va mejorando, pruebas motoras, bitácoras y mediciones simuladas. Las fotos no se generan. El perfil aparece marcado como «Datos ficticios». El registro de hoy queda pendiente para que puedas probar el flujo diario.
-
-Para hacer pruebas sin mezclar con tus datos, usa otra carpeta:
+Generar el ejecutable de lanzamiento:
 
 ```powershell
-$env:NETIN_DATOS = "datos-prueba"; npm run demo:datos; npm run dev
+npm run windows:release
 ```
 
-### Pruebas
+El ejecutable queda en `app\windows\x64\Release\Netin\`. Para crear un paquete instalable, abre `app\windows\Netin.sln` en Visual Studio y usa **Proyecto > Publicar > Crear paquetes de aplicación**.
+
+### Vista previa del diseño en el navegador
+
+Sirve para revisar la interfaz sin compilar. Guarda los datos en el navegador, no usa la cámara y no es la app real.
 
 ```powershell
-npm test         # pruebas de la API de principio a fin (carpeta temporal, no toca tus datos)
-npm run build    # revisión de tipos de interfaz y servidor y compilación
+npm run vista
 ```
+
+Abre http://127.0.0.1:5180.
+
+### Tripulante de demostración
+
+En la pantalla de selección, el botón «Cargar tripulante de demostración» crea a **Astra Demo** (contraseña `demo-netin`) con 14 días de datos ficticios. El perfil queda marcado como «Datos ficticios» y sus mediciones como «Simulada». No se generan fotos, y estos datos no entran en la cola para la IA.
 
 ## Dónde se guarda cada cosa
 
 | Qué | Dónde |
 | --- | --- |
-| Perfiles, contraseñas (hash scrypt), registros, historial de correcciones, conversación y cola para la IA | `datos/netin.db` (SQLite) |
-| Fotos diarias | `datos/fotos/<perfil>/<AAAA-MM-DD>.jpg` |
-| Documentos de la misión | `documentos/` (ver `documentos/LEEME.md`) |
+| Lista de perfiles (nombre, rol, etapa, sal y verificador de la contraseña) | `%LOCALAPPDATA%\Netin\datos\perfiles.json` |
+| Bóveda de cada perfil: registros, historial de correcciones, borradores, conversación y cola para la IA | `%LOCALAPPDATA%\Netin\datos\perfiles\<id>\boveda.json` (cifrada) |
+| Fotos diarias | `%LOCALAPPDATA%\Netin\datos\perfiles\<id>\fotos\<fecha>.json` (cifradas) |
+| Documentos de la misión (PDF y textos) | `%LOCALAPPDATA%\Netin\documentos\` |
 
-Las carpetas `datos/` y `documentos/` no se suben a GitHub. Puedes cambiarlas con las variables `NETIN_DATOS` y `NETIN_DOCUMENTOS`.
+La clave de cifrado sale de la contraseña con scrypt y nunca se guarda. La bóveda y las fotos se cifran con AES-256-GCM. Sin la contraseña de un perfil no se pueden leer sus datos, y cambiar la contraseña vuelve a cifrar todo.
 
-## Estructura del código
+## Estructura del código (`app/`)
 
 ```
-compartido/   catálogos y tipos que usan la interfaz y el servidor (zonas, etapas, indicadores)
-server/       API en Node.js + Express y SQLite integrado de Node (node:sqlite)
-  app.ts        rutas HTTP; todo lo que va después de la sesión queda acotado al perfil
-  perfiles.ts   perfiles, contraseñas y sesiones
-  registros.ts  registros, foto diaria, chequeo, síntomas, borradores e importación CSV
-  salida-ia.ts  cola de datos para la IA futura
-  resumenes.ts  resúmenes automáticos sin IA
-  tests/        pruebas de la API
-src/          interfaz en React + Vite + Tailwind + shadcn/ui
-  pantallas/    Acceso, flujo diario, Inicio, Asistente, Salud, Registros, Documentos, Ajustes
-  componentes/  marco, horizonte animado, mapa corporal, cámara, prueba de reacción, gráficas
-documentos/   carpeta local para los PDF y textos de la misión
+App.tsx                 rutas: acceso, registro diario y pantallas principales
+src/datos/              lógica local, sin servidor
+  boveda.ts               perfiles, contraseñas, cifrado y sesión
+  registros.ts            validación, correcciones, síntomas, chequeo, foto y cola para la IA
+  pendientes.ts           alertas que salen de los registros
+  demo.ts                 tripulante de demostración
+  catalogos.ts            etapas, zonas del cuerpo, indicadores y tipos
+src/plataforma/         acceso a Windows: index.ts (módulo nativo) e index.web.ts (vista previa)
+src/hud/                sistema visual: tema, paneles, medidores, fondo animado, mapa corporal y gráficas
+src/pantallas/          Acceso, registro diario, Inicio, Salud, Registros, Asistente, Documentos y Ajustes
+windows-nativo/         módulo nativo en C++ (archivos, azar seguro, cámara, documentos)
+vista/                  configuración de la vista previa web
 ```
+
+### Primer armado del proyecto de Windows
+
+`init-windows` necesita el .NET SDK, así que la carpeta `app/windows` todavía no existe en el repositorio. Después de generarla:
+
+1. Copia `windows-nativo/NetinNativo.h` a `windows/Netin/`.
+2. En el archivo del `ReactPackageProvider` de la app, incluye `NetinNativo.h` y registra los módulos con `AddAttributedModules`.
+3. Compila con `npm run windows`.
 
 ## Conectar la IA más adelante
 
-La IA no está integrada. El punto de entrada es la cola `cola_ia`:
+La IA no está integrada. Cada registro que se crea, corrige o elimina, y cada mensaje del Asistente, deja un evento en `colaIA` dentro de la bóveda del perfil.
 
-- Cada registro que se crea, corrige o elimina, y cada mensaje del Asistente, agrega un evento.
-- `GET /api/ia/pendientes` devuelve los eventos de la sesión actual. Cada evento trae un paquete que separa lo **reportado** por la persona (síntomas, chequeos, bitácoras, mensajes) de lo **medido** (vitales con su origen y hora, pruebas motoras) y del contexto (fecha y etapa).
-- `POST /api/ia/procesados` con `{ "hasta": <número de evento> }` marca los eventos como leídos.
-- Los resúmenes tienen el campo `origen` (`automatico`, `ia` o `simulado`), de modo que la interfaz ya distingue de dónde sale cada texto.
+- `pendientesIA(sesion)` en `src/datos/registros.ts` devuelve cada evento con un paquete que separa lo **reportado** por la persona de lo **medido** y del contexto (fecha y etapa).
+- `marcarProcesados(sesion, hasta)` marca los eventos como leídos.
+- Los resúmenes llevan `origen` (`automatico`, `ia` o `simulado`) y la interfaz los etiqueta según ese campo.
 
-Las funciones de consulta están en `server/salida-ia.ts`. El asistente deberá respetar estas reglas: distinguir lo reportado, lo medido y lo que dice una fuente; no inventar diagnósticos, umbrales, dosis ni protocolos; y remitir al responsable médico de la misión cuando falte respaldo.
+El asistente deberá distinguir lo reportado, lo medido y lo que dice una fuente; no inventar diagnósticos, umbrales, dosis ni protocolos; y remitir al responsable médico de la misión cuando falte respaldo.
 
-## Estado de las funciones
+## Estado
 
-**Verificado con pruebas automáticas (`npm test`):**
+**Verificado:**
 
-- Crear perfil, contraseña con hash, rechazo de contraseña incorrecta y freno tras varios intentos, cerrar sesión.
-- Aislamiento: un perfil no puede leer, corregir ni borrar registros ni fotos de otro.
-- Foto diaria: se pide primero, se puede repetir, hay una por perfil y fecha, y se puede seguir sin cámara.
-- Los datos se conservan al reiniciar el servidor.
-- Chequeo con síntomas nuevos; al día siguiente pide la foto otra vez y hace seguimiento del síntoma pendiente.
-- Prueba motora: las estadísticas se calculan en el servidor y se comparan con pruebas anteriores.
-- Bitácora guardada tal cual.
-- Corrección con historial y eliminación.
-- Cola para la IA con lo reportado y lo medido separados.
-- Importación de mediciones desde CSV.
-- Archivar, restaurar y eliminar perfiles.
+- Revisión de tipos (`npm run typecheck`).
+- En la vista previa web: crear y elegir perfil, entrar con contraseña, cargar el tripulante de demostración y completar el registro diario.
 
-**Verificado a mano en el navegador:** selección y creación de perfil, y pantalla de foto sin cámara.
+**Pendiente de verificar:**
 
-**Simulado:**
+- Compilar y ejecutar el `.exe`, que espera a que se instalen Visual Studio 2026 con sus cargas de trabajo y el .NET 10 SDK.
+- El módulo nativo en C++, incluida la cámara, que todavía no se ha compilado.
 
-- El botón «Simular» en Salud y las mediciones del perfil de demostración generan valores inventados marcados como «Simulada».
-- La guía del chequeo usa preguntas fijas y no es IA.
+**Simulado:** las mediciones del botón «Simular» y las del tripulante de demostración. La guía del chequeo usa preguntas fijas y no es IA.
 
-**Pendiente:**
+**Pendiente de integración:**
 
 - Asistente con IA: la conversación se guarda, pero todavía no responde.
-- Interpretaciones del asistente en Salud Mental y Habilidades motoras.
+- Interpretaciones en Mental y Habilidades motoras.
 - Posibles explicaciones con respaldo en el mapa corporal.
-- Guía por indicador (cómo medir, qué observar, prevención, cuándo avisar): la app muestra «Sin documento de respaldo».
-- Índice y búsqueda en los documentos: hoy Documentos solo lista y abre los archivos.
-- Avisos compartidos con la tripulación: hoy solo existen avisos locales y simulacros.
-- ARCHeR: el control está visible y marcado como «Integración futura».
+- Guías por indicador: la app muestra «Sin documento de respaldo».
+- Búsqueda en los documentos.
+- Avisos compartidos con la tripulación.
+- ARCHeR, que aparece marcado como «Integración futura».

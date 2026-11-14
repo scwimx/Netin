@@ -1,0 +1,24 @@
+node_modules/
+npm-debug.log
+yarn-error.log
+.metro-health-check*
+*.jsbundle
+/coverage
+vista/dist/
+
+# React Native for Windows: compilados y paquetes
+windows/x64/
+windows/ARM64/
+windows/Debug/
+windows/Release/
+windows/*/Generated Files/
+windows/*/x64/
+windows/*/ARM64/
+windows/*/bin/
+windows/*/obj/
+windows/*/AppPackages/
+windows/*/BundleArtifacts/
+windows/.vs/
+windows/packages/
+*.user
+*.binlog
